@@ -48,15 +48,19 @@ for m in [30, 5, 1]:
                                     'ciB': [float(v) for v in np.quantile(sB, [.025, .975])],
                                     'ci_diff': [float(v) for v in np.quantile(d, [.025, .975])]}
 
-fig, axes = plt.subplots(3, 3, figsize=(12, 9))
-for i, k in enumerate(METRICS):
-    for j, m in enumerate([30, 5, 1]):
-        ax = axes[i, j]; d = diffs[(k, m)]
-        ax.hist(d, bins=60, color='tab:blue', alpha=.8)
-        ax.axvline(0, color='k', lw=1)
-        ax.set_title(f'{k}, m={m}:  P(B>A)={np.mean(d > 0):.2f}', fontsize=10)
-        if i == 2: ax.set_xlabel('score(B) - score(A)')
-fig.tight_layout(); fig.savefig('figures/bootstrap_hist.png', dpi=150)
+def plot_boot(metrics, path):
+    fig, axes = plt.subplots(len(metrics), 3, figsize=(12, 3 * len(metrics)), squeeze=False)
+    for i, k in enumerate(metrics):
+        for j, m in enumerate([30, 5, 1]):
+            ax = axes[i, j]; d = diffs[(k, m)]
+            ax.hist(d, bins=60, color='tab:blue', alpha=.8)
+            ax.axvline(0, color='k', lw=1)
+            ax.set_title(f'{k}, m={m}:  P(B>A)={np.mean(d > 0):.2f}', fontsize=10)
+            if i == len(metrics) - 1: ax.set_xlabel('score(B) - score(A)')
+    fig.tight_layout(); fig.savefig(path, dpi=150)
+
+plot_boot(['mean'], 'figures/bootstrap_mean.png')             # Q2
+plot_boot(['median', 'iqm'], 'figures/bootstrap_median_iqm.png')  # Q3
 
 fig, ax = plt.subplots(figsize=(6, 3.5))
 bins = np.linspace(-200, min(A.min(), B.min()) * 0 + max(A.max(), B.max()) + 1, 30)
